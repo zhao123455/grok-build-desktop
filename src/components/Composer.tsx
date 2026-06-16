@@ -16,6 +16,7 @@ import {
 import { extractFileMentions, readFileSafe, type FileEntry } from '../lib/files';
 import { t } from '../lib/i18n';
 import { FilePicker } from './FilePicker';
+import { Loader2, Send } from 'lucide-react';
 
 export interface ComposerHandle {
   /** Imperatively set the textarea value (used by starter cards / history click / drafts). */
@@ -220,6 +221,8 @@ export const Composer = forwardRef<ComposerHandle, Props>(function Composer(
     }
   };
 
+  const submitLabel = submitting ? t('Queuing…') : hasInflight ? t('Enqueue') : t('Send');
+
   return (
     <div className={`composer${submitting ? ' composer-submitting' : ''}`}>
       {mention && cwd.trim() ? (
@@ -301,8 +304,14 @@ export const Composer = forwardRef<ComposerHandle, Props>(function Composer(
         className="composer-send"
         disabled={submitting}
         onClick={() => void submit()}
+        aria-label={submitLabel}
+        title={submitLabel}
       >
-        {submitting ? t('Queuing…') : hasInflight ? t('Enqueue') : t('Send')}
+        {submitting ? (
+          <Loader2 className="composer-send-icon composer-send-icon-spin" size={17} strokeWidth={2.2} />
+        ) : (
+          <Send className="composer-send-icon" size={17} strokeWidth={2.2} />
+        )}
       </button>
     </div>
   );

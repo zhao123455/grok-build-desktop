@@ -5914,19 +5914,148 @@ button.status-cluster.status-action {
   padding: 0.7rem 0.95rem;
 }
 
+.app-shell .composer-row {
+  background: color-mix(in srgb, var(--panel-raised) 92%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow:
+    0 22px 54px rgba(2, 6, 16, 0.24),
+    0 1px 0 color-mix(in srgb, white 5%, transparent) inset;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 12px auto 12px;
+  max-width: 590px;
+  padding: 9px 12px 8px;
+  position: relative;
+  width: calc(100% - 32px);
+}
+
+.app-shell:not(.theme-dark) .composer-row {
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow:
+    0 18px 44px rgba(20, 47, 95, 0.12),
+    0 1px 0 rgba(255, 255, 255, 0.74) inset;
+}
+
 .app-shell .composer {
-  background: var(--panel-raised);
-  border-color: var(--line);
+  align-items: stretch;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  display: block;
+  min-height: 42px;
+  overflow: visible;
+  padding: 0 46px 0 0;
+  position: static;
 }
 
 .app-shell .composer textarea {
-  border-color: var(--line);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: var(--text);
   font-size: 15px;
   font-weight: 400;
-  line-height: 1.5;
+  line-height: 1.45;
+  max-height: 180px;
+  min-height: 40px;
+  padding: 8px 4px 6px;
 }
 
-.app-shell .composer-send,
+.app-shell .composer textarea:focus {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.app-shell .composer textarea::placeholder {
+  color: color-mix(in srgb, var(--text-soft) 76%, transparent);
+}
+
+.app-shell .composer-footer {
+  background: transparent;
+  border-top: 0;
+  flex-wrap: nowrap;
+  gap: 6px;
+  margin: 0;
+  max-width: none;
+  min-height: 32px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0 48px 0 0;
+  scrollbar-width: none;
+  width: 100%;
+}
+
+.app-shell .composer-footer::-webkit-scrollbar {
+  display: none;
+}
+
+.app-shell .composer-footer select {
+  background: color-mix(in srgb, var(--button) 70%, transparent);
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  box-shadow: none;
+  color: var(--text-soft);
+  font-size: 12.5px;
+  font-weight: 600;
+  flex: 0 0 auto;
+  height: 28px;
+  line-height: 1;
+  max-width: 148px;
+  min-height: 28px;
+  padding: 0 9px;
+}
+
+.app-shell .composer-hint {
+  display: none;
+}
+
+.app-shell .composer-send {
+  align-items: center;
+  background: #f7fbff !important;
+  border: 0 !important;
+  border-radius: 999px;
+  bottom: 11px;
+  box-shadow: 0 10px 22px rgba(20, 47, 95, 0.18);
+  color: #122036 !important;
+  display: inline-flex;
+  height: 40px;
+  justify-content: center;
+  min-height: 40px;
+  min-width: 40px;
+  padding: 0;
+  position: absolute;
+  right: 12px;
+  width: 40px;
+}
+
+.app-shell.theme-dark .composer-send {
+  background: #f7f7f5 !important;
+  color: #161616 !important;
+}
+
+.app-shell .composer-send:disabled {
+  background: color-mix(in srgb, var(--button) 68%, transparent) !important;
+  box-shadow: none;
+  color: var(--text-soft) !important;
+}
+
+.app-shell .composer-send-icon {
+  display: block;
+}
+
+.app-shell .composer-send-icon-spin {
+  animation: composer-send-spin 1s linear infinite;
+}
+
+@keyframes composer-send-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .app-shell .primary-run,
 .app-shell .mini-run {
   background: linear-gradient(180deg, var(--grok-accent-hi), var(--grok-accent)) !important;
@@ -5935,11 +6064,15 @@ button.status-cluster.status-action {
   box-shadow: 0 12px 26px color-mix(in srgb, var(--accent) 24%, transparent);
 }
 
-.app-shell .composer-send:hover,
 .app-shell .primary-run:hover:not(:disabled),
 .app-shell .mini-run:hover:not(:disabled) {
   filter: brightness(1.04);
   box-shadow: 0 16px 34px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.app-shell .composer-send:hover:not(:disabled) {
+  filter: brightness(1.04);
+  box-shadow: 0 12px 26px rgba(20, 47, 95, 0.22);
 }
 
 .app-shell .check-chip input,
