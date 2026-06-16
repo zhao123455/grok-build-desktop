@@ -1,4 +1,5 @@
 use grok_desktop_lib::runs::db::{Db, RunState};
+use grok_desktop_lib::runs::event::GrokEvent;
 use grok_desktop_lib::runs::queue::{QueueMessageKind, RunQueue};
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -17,8 +18,14 @@ async fn enqueue_runs_serial_and_emits_events() {
     let q = Arc::new(q);
     q.clone().spawn_worker();
 
-    let (_id1, pos1) = q.enqueue("p1".into(), "/tmp".into(), vec!["--ok".into()]).await.unwrap();
-    let (_id2, pos2) = q.enqueue("p2".into(), "/tmp".into(), vec!["--ok".into()]).await.unwrap();
+    let (_id1, pos1) = q
+        .enqueue("p1".into(), "/tmp".into(), vec!["--ok".into()])
+        .await
+        .unwrap();
+    let (_id2, pos2) = q
+        .enqueue("p2".into(), "/tmp".into(), vec!["--ok".into()])
+        .await
+        .unwrap();
     assert_eq!(pos1, 0);
     assert_eq!(pos2, 1);
 
@@ -68,6 +75,22 @@ async fn enqueue_runs_serial_and_emits_events() {
         done_count,
         events.len()
     );
+    let text_chunks: Vec<&str> = events
+        .iter()
+        .filter_map(|m| match &m.kind {
+            QueueMessageKind::Event {
+                event: GrokEvent::Text { data },
+                ..
+            } => Some(data.as_str()),
+            _ => None,
+        })
+        .collect();
+    assert!(
+        text_chunks
+            .windows(2)
+            .any(|pair| pair == ["hello", " world"]),
+        "expected streaming text chunks, got {text_chunks:?}"
+    );
 }
 
 #[tokio::test]
@@ -77,7 +100,10 @@ async fn cancel_queued_marks_cancelled_without_running() {
     let q = Arc::new(q);
     // Do NOT spawn worker — we want to inspect waiting queue state directly.
 
-    let (id, _) = q.enqueue("p".into(), "/tmp".into(), vec!["--ok".into()]).await.unwrap();
+    let (id, _) = q
+        .enqueue("p".into(), "/tmp".into(), vec!["--ok".into()])
+        .await
+        .unwrap();
     let cancelled = q.cancel(&id).await.unwrap();
     assert!(cancelled);
 

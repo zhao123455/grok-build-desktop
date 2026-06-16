@@ -17,6 +17,9 @@ pub enum GrokEvent {
         #[serde(rename = "requestId")]
         request_id: String,
     },
+    Error {
+        message: String,
+    },
     #[serde(other)]
     Unknown,
 }

@@ -29,6 +29,15 @@ describe('streamStore', () => {
     expect(snap?.stopReason).toBe('EndTurn');
   });
 
+  it('error event becomes visible assistant text and failed state', () => {
+    applyRunEvent('r1', { type: 'error', message: 'subscription required' });
+    const snap = streamStore.getRunSnapshot('r1');
+    expect(snap?.state).toBe('failed');
+    expect(snap?.error).toBe('subscription required');
+    expect(snap?.text).toBe('Error: subscription required');
+    expect(snap?.lastEventType).toBe('text');
+  });
+
   it('applyStateChange overwrites state and timestamps', () => {
     applyStateChange('r1', { state: 'Running', startedAt: 100 });
     const snap = streamStore.getRunSnapshot('r1');

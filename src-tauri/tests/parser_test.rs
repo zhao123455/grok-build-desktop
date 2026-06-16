@@ -19,12 +19,50 @@ fn parses_text_event() {
 fn parses_end_event() {
     let line = r#"{"type":"end","stopReason":"EndTurn","sessionId":"abc","requestId":"xyz"}"#;
     let event = parse_line(line).expect("should parse");
-    if let GrokEvent::End { stop_reason, session_id, request_id } = event {
+    if let GrokEvent::End {
+        stop_reason,
+        session_id,
+        request_id,
+    } = event
+    {
         assert_eq!(stop_reason, "EndTurn");
         assert_eq!(session_id, "abc");
         assert_eq!(request_id, "xyz");
     } else {
         panic!("expected End variant");
+    }
+}
+
+#[test]
+fn parses_error_event() {
+    let line = r#"{"type":"error","message":"subscription required"}"#;
+    let event = parse_line(line).expect("should parse");
+    if let GrokEvent::Error { message } = event {
+        assert_eq!(message, "subscription required");
+    } else {
+        panic!("expected Error variant");
+    }
+}
+
+#[test]
+fn parses_openai_text_delta_event() {
+    let line = r#"{"type":"response.output_text.delta","delta":"hel"}"#;
+    let event = parse_line(line).expect("should parse");
+    if let GrokEvent::Text { data } = event {
+        assert_eq!(data, "hel");
+    } else {
+        panic!("expected Text variant");
+    }
+}
+
+#[test]
+fn parses_anthropic_content_block_delta_event() {
+    let line = r#"{"type":"content_block_delta","delta":{"type":"text_delta","text":"lo"}}"#;
+    let event = parse_line(line).expect("should parse");
+    if let GrokEvent::Text { data } = event {
+        assert_eq!(data, "lo");
+    } else {
+        panic!("expected Text variant");
     }
 }
 

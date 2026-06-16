@@ -5,6 +5,7 @@ export type GrokEvent =
   | { type: 'thought'; data: string }
   | { type: 'text'; data: string }
   | { type: 'end'; stopReason: string; sessionId: string; requestId: string }
+  | { type: 'error'; message: string }
   | { type: string; [k: string]: unknown };
 
 export type RunState = 'queued' | 'running' | 'done' | 'cancelled' | 'failed';
@@ -140,6 +141,22 @@ export function applyRunEvent(runId: string, event: GrokEvent, raw?: unknown): v
       stopReason: e.stopReason,
       endedAt: Date.now(),
     });
+  } else if (event.type === 'error') {
+    const message = String((event as any).message ?? 'Grok stream error');
+    const nextText = cur?.text
+      ? `${cur.text}\n\nError: ${message}`
+      : `Error: ${message}`;
+    streamStore.patchRun(runId, {
+      text: nextText,
+      textChars: nextText.length,
+      lastEventType: 'text',
+      state: 'failed',
+      error: message,
+      endedAt: Date.now(),
+    });
+    import('./markdownWorker').then(({ scheduleMarkdownParse }) => {
+      scheduleMarkdownParse(runId, nextText);
+    }).catch(() => {});
   } else if (raw) {
     // Unknown typed event — try to classify as a trace (tool/subagent/task).
     const result = classifyEvent(raw);
