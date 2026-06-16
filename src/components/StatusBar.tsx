@@ -1,7 +1,9 @@
 import { useActiveRun } from '../hooks/useActiveRun';
 import { useElapsed } from '../hooks/useElapsed';
 import { useQueue } from '../hooks/useQueue';
+import { useLocale } from '../hooks/useLocale';
 import { usePendingSubmitCount } from '../hooks/usePendingSubmit';
+import { t } from '../lib/i18n';
 import type { RunSnapshot } from '../lib/streamStore';
 
 function formatTokens(chars: number): string {
@@ -25,17 +27,17 @@ function formatElapsed(ms: number): string {
  */
 function stateSuffix(snap: RunSnapshot | undefined): string | null {
   if (!snap) return null;
-  if (snap.state === 'done') return `done${snap.stopReason ? ' · ' + snap.stopReason : ''}`;
-  if (snap.state === 'cancelled') return 'cancelled';
-  if (snap.state === 'failed') return `failed${snap.error ? ': ' + snap.error : ''}`;
+  if (snap.state === 'done') return `${t('done')}${snap.stopReason ? ' · ' + snap.stopReason : ''}`;
+  if (snap.state === 'cancelled') return t('cancelled');
+  if (snap.state === 'failed') return `${t('failed')}${snap.error ? ': ' + snap.error : ''}`;
   // Spell out exactly what Grok is doing right now (the user asked to always
   // see the live phase, Claude/Codex-style):
   //   thought event  → reasoning privately       → "thinking…"
   //   text event     → emitting the answer        → "writing…"
   //   running, none   → spun up, nothing back yet  → "working…"
-  if (snap.lastEventType === 'thought') return 'thinking…';
-  if (snap.lastEventType === 'text') return 'writing…';
-  if (snap.state === 'running' || snap.state === 'queued') return 'working…';
+  if (snap.lastEventType === 'thought') return t('thinking…');
+  if (snap.lastEventType === 'text') return t('writing…');
+  if (snap.state === 'running' || snap.state === 'queued') return t('working…');
   return null;
 }
 
@@ -56,6 +58,7 @@ function GrokMark({ pulsing }: { pulsing: boolean }) {
 }
 
 export function StatusBar() {
+  useLocale();
   const active = useActiveRun();
   const queue = useQueue();
   const pending = usePendingSubmitCount();
@@ -70,12 +73,12 @@ export function StatusBar() {
         <div className="status-bar">
           <GrokMark pulsing />
           <span className="status-state">
-            preparing run{pending > 1 ? ` (×${pending})` : ''}…
+            {t('preparing run')}{pending > 1 ? ` (×${pending})` : ''}…
           </span>
           {queuedExtra > 0 ? (
             <>
               <span className="status-sep">·</span>
-              <span className="status-queue">+{queuedExtra} queued</span>
+              <span className="status-queue">+{queuedExtra} {t('queued')}</span>
             </>
           ) : null}
         </div>
@@ -85,16 +88,16 @@ export function StatusBar() {
       return (
         <div className="status-bar">
           <GrokMark pulsing={false} />
-          <span className="status-state">idle</span>
+          <span className="status-state">{t('idle')}</span>
           <span className="status-sep">·</span>
-          <span className="status-queue">+{queuedExtra} queued</span>
+          <span className="status-queue">+{queuedExtra} {t('queued')}</span>
         </div>
       );
     }
     return (
       <div className="status-bar status-bar-idle">
         <GrokMark pulsing={false} />
-        <span className="status-state">idle</span>
+        <span className="status-state">{t('idle')}</span>
       </div>
     );
   }
@@ -109,7 +112,7 @@ export function StatusBar() {
         {elapsed != null ? formatElapsed(elapsed) : '0.0s'}
       </span>
       <span className="status-sep">·</span>
-      <span className="status-tokens">≈{formatTokens(chars)} tokens</span>
+      <span className="status-tokens">≈{formatTokens(chars)} {t('tokens')}</span>
       {suffix ? (
         <>
           <span className="status-sep">·</span>
@@ -119,7 +122,7 @@ export function StatusBar() {
       {queuedExtra > 0 ? (
         <>
           <span className="status-sep">·</span>
-          <span className="status-queue">+{queuedExtra} queued</span>
+          <span className="status-queue">+{queuedExtra} {t('queued')}</span>
         </>
       ) : null}
     </div>

@@ -64,6 +64,10 @@ import { SettingsPage } from "./components/SettingsPage";
 import { ToolsPage } from "./components/ToolsPage";
 import { ContextMenu, type ContextMenuState, type ContextMenuItem } from "./components/ContextMenu";
 import { useActiveRun } from "./hooks/useActiveRun";
+import { useLocale } from "./hooks/useLocale";
+import { setLocale, t } from "./lib/i18n";
+import kunLogo from "./assets/kun/kun.png";
+import kunGreet from "./assets/kun/kun_greet.png";
 
 type Mode = "standard" | "coding";
 type Runner =
@@ -434,22 +438,15 @@ type HistoryRow = HistoryPreview & {
   active: boolean;
 };
 
-// Brand mark — a constructed geometric "G" monogram (monoline grotesque,
-// matched to the app's Geist display face). Crisp and flat in-app so it stays
-// sharp at chip size and adapts to the theme-aware foreground; the dock icon
-// carries the richer graphite material. Same letterform everywhere → one
-// identity. Self-contained path (no font dependency for rasterized icons).
 function BrandGlyph({ size = 18 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden focusable="false">
-      <path
-        d="M18.5 8.2 A7.6 7.6 0 1 0 19.6 12 L13 12"
-        stroke="currentColor"
-        strokeWidth="2.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <img
+      src={kunLogo}
+      alt=""
+      aria-hidden
+      className="kun-brand-glyph"
+      style={{ width: size, height: size }}
+    />
   );
 }
 
@@ -714,6 +711,7 @@ function grokTrust(output: string) {
 }
 
 function App() {
+  const locale = useLocale();
   const [mode, setMode] = useState<Mode>(() => {
     const stored = window.localStorage.getItem(storageKeys.mode);
     return stored === "coding" || stored === "standard" ? stored : "coding";
@@ -2604,6 +2602,8 @@ function App() {
         section={settingsSection}
         onSection={setSettingsSection}
         onClose={() => setSettingsOpen(false)}
+        locale={locale}
+        setLocale={setLocale}
         themeMode={themeMode}
         setThemeMode={setThemeMode}
         dockPosition={dockPosition}
@@ -2670,23 +2670,23 @@ function App() {
         <div className="brand">
           <div className="brand-mark"><BrandGlyph size={18} /></div>
           <div>
-            <h1>Grok Build Desktop</h1>
-            <span>Grok Build for engineers</span>
+            <h1>{t("Grok Build Desktop")}</h1>
+            <span>{t("Grok Build for engineers")}</span>
           </div>
           {/* The chevron previously looked clickable but did nothing. Now it
               opens the ⌘K palette — the natural "what can I do?" affordance. */}
           <button
             className="brand-chevron"
             type="button"
-            aria-label="Open command palette"
-            title="Command palette (⌘K)"
+            aria-label={t("Open command palette")}
+            title={t("Command palette (⌘K)")}
             onClick={() => setPaletteOpen(true)}
           >
             <ChevronDown size={16} />
           </button>
         </div>
 
-        <section className="nav-section primary-nav" aria-label="Primary navigation">
+        <section className="nav-section primary-nav" aria-label={t("Primary navigation")}>
           <div className="nav-list">
             {primaryNavItems.map((item) => {
               // Each nav item maps to a single, deterministic action — no
@@ -2728,8 +2728,8 @@ function App() {
                   onClick={handle}
                 >
                   {item.label === "New Session" ? <Plus size={16} /> : item.label === "Search" ? <Search size={16} /> : item.label === "Tools" ? <Wrench size={16} /> : <Settings size={16} />}
-                  <span>{item.label}</span>
-                  <small>{item.meta}</small>
+                  <span>{t(item.label)}</span>
+                  <small>{t(item.meta)}</small>
                 </button>
               );
             })}
@@ -2738,14 +2738,14 @@ function App() {
 
         <section className="nav-section history-nav">
           <div className="nav-head">
-            <span>Conversations</span>
+            <span>{t("Conversations")}</span>
             {/* Refresh icon — clears the filter input so the user sees the
                 full recent-prompts list again. Was a decorative icon before. */}
             <button
               className="history-refresh"
               type="button"
-              aria-label="Clear filter"
-              title="Clear filter and show all recent prompts"
+              aria-label={t("Clear filter")}
+              title={t("Clear filter and show all recent prompts")}
               onClick={() => {
                 setHistoryFilter("");
                 historySearchInputRef.current?.focus();
@@ -2758,8 +2758,8 @@ function App() {
             <Search size={15} />
             <input
               ref={historySearchInputRef}
-              aria-label="Search history"
-              placeholder="Search conversations..."
+              aria-label={t("Search history")}
+              placeholder={t("Search conversations...")}
               onChange={(event) => setHistoryFilter(event.currentTarget.value)}
               value={historyFilter}
             />
@@ -2771,11 +2771,11 @@ function App() {
               <div className="history-empty">
                 {historyFilter.trim() ? (
                   <>
-                    <span>No matches for</span>
+                    <span>{t("No matches for")}</span>
                     <code>{historyFilter.trim()}</code>
                   </>
                 ) : (
-                  <span>Your conversations will show up here.</span>
+                  <span>{t("Your conversations will show up here.")}</span>
                 )}
               </div>
             ) : (
@@ -2783,7 +2783,7 @@ function App() {
                 {historyView.pinned.length > 0 ? (
                   <div className="history-group">
                     <div className="history-section-head">
-                      <Pin size={12} /> Pinned
+                      <Pin size={12} /> {t("Pinned")}
                     </div>
                     {historyView.pinned.map(renderHistoryRow)}
                   </div>
@@ -2802,7 +2802,7 @@ function App() {
                   <div className="history-group">
                     {historyView.pinned.length > 0 || historyView.groups.length > 0 ? (
                       <div className="history-section-head">
-                        <History size={12} /> Recent
+                        <History size={12} /> {t("Recent")}
                       </div>
                     ) : null}
                     {historyView.ungrouped.map(renderHistoryRow)}
@@ -2816,7 +2816,7 @@ function App() {
                       className="history-section-head toggle"
                       onClick={() => setShowArchived((v) => !v)}
                     >
-                      <Archive size={12} /> Archived ({historyView.archived.length})
+                      <Archive size={12} /> {t("Archived")} ({historyView.archived.length})
                       <ChevronDown size={13} className={`chev${showArchived || historyFilter.trim() ? " open" : ""}`} />
                     </button>
                     {showArchived || historyFilter.trim() ? historyView.archived.map(renderHistoryRow) : null}
@@ -2828,11 +2828,11 @@ function App() {
           {historyNote ? <div className="history-toast">{historyNote}</div> : null}
         </section>
 
-        <section className="sidebar-health" aria-label="Tool health">
+        <section className="sidebar-health" aria-label={t("Tool health")}>
           <div className="nav-head">
-            <span>Health</span>
+            <span>{t("Health")}</span>
             <button
-              aria-label="Refresh status"
+              aria-label={t("Refresh status")}
               className="sidebar-icon"
               disabled={busyRunner !== null}
               onClick={refreshStatuses}
@@ -2843,11 +2843,11 @@ function App() {
           </div>
           <div className={`health-pill ${statusTone(grokToolStatus)}`}>
             <Zap size={15} />
-            <span>{grokToolStatus?.installed ? "Grok ready" : "Grok missing"}</span>
+            <span>{grokToolStatus?.installed ? t("Grok ready") : t("Grok missing")}</span>
           </div>
           <button className="doctor-button" disabled={busyRunner !== null} onClick={runDoctor} type="button">
             {busyRunner === "doctor" ? <Loader2 className="spin" size={16} /> : <ClipboardCheck size={16} />}
-            <span>Doctor</span>
+            <span>{t("Doctor")}</span>
           </button>
         </section>
 
@@ -2857,15 +2857,15 @@ function App() {
         <button
           className="account-strip"
           type="button"
-          aria-label="Open settings"
-          title="Settings (⌘,)"
+          aria-label={t("Open settings")}
+          title={t("Settings (⌘,)")}
           onClick={() => setSettingsOpen(true)}
         >
           <div className={`avatar${isGrokReady ? " ready" : ""}`}><BrandGlyph size={17} /></div>
           <div className="account-text">
             {/* Real data: active model + live grok connection status. */}
             <strong>{activeModel}</strong>
-            <span>{isGrokReady ? "Connected · grok.com" : statusLabel}</span>
+            <span>{isGrokReady ? t("Connected · grok.com") : t(statusLabel)}</span>
           </div>
           <span className="account-settings" aria-hidden="true">
             <Settings size={16} />
@@ -2886,7 +2886,7 @@ function App() {
             onClick={pickFolder}
             type="button"
             disabled={folderPickerBusy}
-            title={codingCwd ? codingCwd : "Pick a project folder"}
+            title={codingCwd ? codingCwd : t("Pick a project folder")}
           >
             {folderPickerBusy ? <Loader2 className="spin" size={14} /> : <FolderGit2 size={14} />}
             <span>{repoName}</span>
@@ -2898,19 +2898,19 @@ function App() {
                 className="primary-run"
                 onClick={() => void cancelRun(activeRunId)}
                 type="button"
-                title="Stop the current run"
+                title={t("Stop the current run")}
               >
                 <X size={15} />
-                <span>Stop</span>
+                <span>{t("Stop")}</span>
               </button>
             ) : (
               <span
                 className={`conn-pill ${isGrokReady ? "ready" : "blocked"}`}
-                title={isGrokReady ? "Connected to grok.com" : `Grok ${statusLabel.toLowerCase()}`}
-                aria-label={isGrokReady ? "Grok connected" : "Grok not connected"}
+                title={isGrokReady ? t("Connected to grok.com") : `Grok ${t(statusLabel).toLowerCase()}`}
+                aria-label={isGrokReady ? t("Grok connected") : t("Grok not connected")}
               >
                 <span className="conn-dot-mini" aria-hidden />
-                {isGrokReady ? "Grok" : "Offline"}
+                {isGrokReady ? "Grok" : t("Offline")}
               </span>
             )}
             {/* Day / night theme toggle (also ⌘⇧L). Bordered + full-contrast
@@ -2918,8 +2918,8 @@ function App() {
             <button
               className="titlebar-icon-btn theme-toggle"
               type="button"
-              aria-label={themeMode === "dark" ? "Switch to light theme" : "Switch to dark theme"}
-              title={themeMode === "dark" ? "Switch to light mode (⌘⇧L)" : "Switch to dark mode (⌘⇧L)"}
+              aria-label={themeMode === "dark" ? t("Switch to light theme") : t("Switch to dark theme")}
+              title={themeMode === "dark" ? t("Switch to light mode (⌘⇧L)") : t("Switch to dark mode (⌘⇧L)")}
               onClick={() => setThemeMode(themeMode === "dark" ? "light" : "dark")}
             >
               {themeMode === "dark" ? (
@@ -2933,8 +2933,8 @@ function App() {
             <button
               className={`detail-toggle${contextOpen || previewOpen || terminalOpen || toolsOpen ? " active" : ""}`}
               type="button"
-              aria-label="Open panels menu"
-              title="Panels — Preview, Context, Terminal"
+              aria-label={t("Open panels menu")}
+              title={t("Panels — Preview, Context, Terminal")}
               onClick={openPanelMenu}
             >
               <PanelRight size={16} />
@@ -2954,10 +2954,12 @@ function App() {
               {messages.length === 0 ? (
                 <div className="empty-state">
                   <div className="empty-state-head">
-                    <div className="empty-state-avatar"><Bot size={22} /></div>
-                    <h2 className="empty-state-title">How can Grok help today?</h2>
+                    <div className="empty-state-avatar kun-empty-mascot">
+                      <img src={kunGreet} alt="" aria-hidden />
+                    </div>
+                    <h2 className="empty-state-title">{t("How can Grok help today?")}</h2>
                     <p className="empty-state-subtitle">
-                      Code with you across this repository · {activeModel}
+                      {t("Code with you across this repository")} · {activeModel}
                     </p>
                   </div>
                   <div className="starter-grid">
@@ -2993,13 +2995,13 @@ function App() {
                         onClick={() => updatePrompt(card.prompt)}
                         type="button"
                       >
-                        <strong>{card.title}</strong>
-                        <span>{card.body}</span>
+                        <strong>{t(card.title)}</strong>
+                        <span>{t(card.body)}</span>
                       </button>
                     ))}
                   </div>
                   <p className="empty-state-hint">
-                    Press <kbd>↵</kbd> to send · <kbd>⇧↵</kbd> newline · <kbd>⌘1</kbd>/<kbd>⌘2</kbd> to switch modes
+                    {t("Press")} <kbd>↵</kbd> {t("to send")} · <kbd>⇧↵</kbd> {t("newline")} · <kbd>⌘1</kbd>/<kbd>⌘2</kbd> {t("to switch modes")}
                   </p>
                 </div>
               ) : (
@@ -3016,20 +3018,18 @@ function App() {
                 <div className="autopilot-warning" role="alert">
                   <AlertTriangle size={15} />
                   <div>
-                    <strong>Autopilot is on — Grok auto-approves every action.</strong>
+                    <strong>{t("Autopilot is on — Grok auto-approves every action.")}</strong>
                     <span>
-                      It can edit files and run shell commands with{" "}
-                      <code>--always-approve</code>, no confirmation. Only use this in a
-                      sandbox or a disposable git checkout.
+                      {t("It can edit files and run shell commands with --always-approve, no confirmation. Only use this in a sandbox or a disposable git checkout.")}
                     </span>
                   </div>
                   <button
                     type="button"
                     className="autopilot-warning-dismiss"
                     onClick={() => setActionPolicy("patch")}
-                    title="Switch back to Patch ready"
+                    title={t("Switch back to Patch ready")}
                   >
-                    Switch to Patch
+                    {t("Switch to Patch")}
                   </button>
                 </div>
               ) : null}
@@ -3039,7 +3039,7 @@ function App() {
                 argsBuilder={buildGrokArgs}
                 promptWrapper={buildPromptWithPreamble}
                 initialValue={drafts[mode] || defaultDrafts[mode]}
-                placeholder={modeCopy[mode].placeholder}
+                placeholder={t(modeCopy[mode].placeholder)}
                 onTextChange={(text) => {
                   setDrafts((current) => ({ ...current, [mode]: text }));
                 }}
@@ -3047,21 +3047,21 @@ function App() {
               />
               <div className="composer-footer">
                 <select
-                  aria-label="Interaction mode"
+                  aria-label={t("Interaction mode")}
                   className="mode-select"
                   onChange={(event) => switchMode(event.currentTarget.value as Mode)}
                   value={mode}
                 >
                   {(Object.keys(modeCopy) as Mode[]).map((item) => (
                     <option key={item} value={item}>
-                      {modeCopy[item].title}
+                      {t(modeCopy[item].title)}
                     </option>
                   ))}
                 </select>
                 <select
-                  aria-label="Grok model"
+                  aria-label={t("Grok model")}
                   className="model-select-footer"
-                  title={modelIsVerified ? `Model: ${activeModel}` : `${activeModel} — not in grok CLI list, may fall back`}
+                  title={modelIsVerified ? t("Model: {model}", { model: activeModel }) : t("{model} — not in grok CLI list, may fall back", { model: activeModel })}
                   onChange={(event) => {
                     const value = event.currentTarget.value;
                     if (isGrokModelId(value)) {
@@ -3077,14 +3077,14 @@ function App() {
                     const verified = availableModels.length === 0 || availableModels.includes(id);
                     return (
                       <option key={id} value={id}>
-                        {verified ? id : `${id} · not in CLI`}
+                        {verified ? id : `${id} · ${t("not in CLI")}`}
                       </option>
                     );
                   })}
-                  <option value="custom">Custom…</option>
+                  <option value="custom">{t("Custom…")}</option>
                 </select>
                 <select
-                  aria-label="Coding workflow"
+                  aria-label={t("Coding workflow")}
                   className="workflow-select"
                   onChange={(event) => {
                     const preset = codingPresets.find((item) => item.id === event.currentTarget.value);
@@ -3094,18 +3094,18 @@ function App() {
                 >
                   {codingPresets.map((preset) => (
                     <option key={preset.id} value={preset.id}>
-                      {preset.label}
+                      {t(preset.label)}
                     </option>
                   ))}
                 </select>
                 <select
-                  aria-label="Action policy"
+                  aria-label={t("Action policy")}
                   onChange={(event) => setActionPolicy(event.currentTarget.value as ActionPolicy)}
                   value={actionPolicy}
                 >
                   {(Object.keys(actionPolicies) as ActionPolicy[]).map((policy) => (
                     <option key={policy} value={policy}>
-                      {actionPolicies[policy].label}
+                      {t(actionPolicies[policy].label)}
                     </option>
                   ))}
                 </select>
@@ -3113,25 +3113,25 @@ function App() {
                     glance below the chat box (Claude-style). Labels are
                     self-describing since the footer has no separate captions. */}
                 <select
-                  aria-label="Agent effort"
+                  aria-label={t("Agent effort")}
                   className="run-select"
-                  title="Agent effort — how hard Grok works per turn"
+                  title={t("Agent effort — how hard Grok works per turn")}
                   value={effortLevel}
                   onChange={(event) => setEffortLevel(event.currentTarget.value as EffortLevel)}
                 >
                   {(Object.keys(effortLevels) as EffortLevel[]).map((k) => (
-                    <option key={k} value={k}>{`Effort: ${effortLevels[k].label}`}</option>
+                    <option key={k} value={k}>{t("Effort: {label}", { label: t(effortLevels[k].label) })}</option>
                   ))}
                 </select>
                 <select
-                  aria-label="Reasoning effort"
+                  aria-label={t("Reasoning effort")}
                   className="run-select"
-                  title="Reasoning effort — extra thinking budget on hard paths"
+                  title={t("Reasoning effort — extra thinking budget on hard paths")}
                   value={reasoningEffort}
                   onChange={(event) => setReasoningEffort(event.currentTarget.value as ReasoningEffort)}
                 >
                   {(Object.keys(reasoningEfforts) as ReasoningEffort[]).map((k) => (
-                    <option key={k} value={k}>{`Reasoning: ${reasoningEfforts[k].label}`}</option>
+                    <option key={k} value={k}>{t("Reasoning: {label}", { label: t(reasoningEfforts[k].label) })}</option>
                   ))}
                 </select>
                 {/* Raw grok --permission-mode lives in Settings → Permissions
@@ -3139,9 +3139,9 @@ function App() {
                     policy" (Review/Plan/Patch/Autopilot) as the single
                     permission control, so the two no longer overlap. */}
                 <select
-                  aria-label="Best-of-N"
+                  aria-label={t("Best-of-N")}
                   className="run-select"
-                  title="Best-of-N — run N ways in parallel, keep the best"
+                  title={t("Best-of-N — run N ways in parallel, keep the best")}
                   value={bestOfN}
                   onChange={(event) => setBestOfN(Number(event.currentTarget.value))}
                 >
@@ -3150,14 +3150,14 @@ function App() {
                   ))}
                 </select>
                 <span className="composer-hint" aria-hidden="true">
-                  ↵ Send · ⇧↵ Newline · ⌘↵ Force
+                  ↵ {t("Send")} · ⇧↵ {t("Newline")} · ⌘↵ {t("Force")}
                 </span>
                 {grokIsRunning && activeRunId ? (
                   <button
                     className="mini-run"
                     onClick={() => void cancelRun(activeRunId)}
                     type="button"
-                    title="Stop run"
+                    title={t("Stop run")}
                   >
                     <X size={16} />
                   </button>
@@ -3169,24 +3169,24 @@ function App() {
           <aside
             aria-hidden={!previewOpen}
             className={`preview-panel preview-drawer ${previewOpen ? "open" : ""}`}
-            aria-label="Generated preview"
+            aria-label={t("Generated preview")}
           >
             <div className="preview-head">
               <div>
                 <Globe2 size={16} />
-                <strong>Preview</strong>
-                <span>{previewReady ? previewEntry : "waiting for index.html"}</span>
+                <strong>{t("Preview")}</strong>
+                <span>{previewReady ? previewEntry : t("waiting for index.html")}</span>
               </div>
               <div className="preview-actions">
                 <button
-                  aria-label="Refresh preview"
+                  aria-label={t("Refresh preview")}
                   disabled={previewBusy}
                   onClick={() => refreshStaticPreview()}
                   type="button"
                 >
                   {previewBusy ? <Loader2 className="spin" size={15} /> : <RefreshCcw size={15} />}
                 </button>
-                <button aria-label="Close preview" onClick={() => setPreviewOpen(false)} type="button">
+                <button aria-label={t("Close preview")} onClick={() => setPreviewOpen(false)} type="button">
                   <X size={15} />
                 </button>
               </div>
@@ -3196,13 +3196,13 @@ function App() {
                 <iframe
                   sandbox="allow-forms allow-popups allow-scripts"
                   srcDoc={staticPreview?.html}
-                  title="Generated static site preview"
+                  title={t("Generated static site preview")}
                 />
               ) : (
                 <div className="preview-empty">
                   <FileText size={22} />
-                  <strong>No static preview yet</strong>
-                  <span>{staticPreview?.detail ?? "Ask Grok to create index.html, then the result appears here."}</span>
+                  <strong>{t("No static preview yet")}</strong>
+                  <span>{staticPreview?.detail ? t(staticPreview.detail) : t("Ask Grok to create index.html, then the result appears here.")}</span>
                 </div>
               )}
             </div>
@@ -3218,7 +3218,7 @@ function App() {
               ) : (
                 <span>
                   <FileText size={13} />
-                  <span>No files in project root</span>
+                  <span>{t("No files in project root")}</span>
                 </span>
               )}
             </div>
@@ -3233,13 +3233,13 @@ function App() {
             open={contextOpen}
           >
             <summary>
-              <span><PanelRight size={16} /> Context and tools</span>
+              <span><PanelRight size={16} /> {t("Context and tools")}</span>
               <small>
-                {grokInspectCount(inspectOutput, "Skills")} skills · {grokInspectCount(inspectOutput, "MCP Servers")} MCP · {grokInspectCount(inspectOutput, "Agents")} agents
+                {grokInspectCount(inspectOutput, "Skills")} {t("skills")} · {grokInspectCount(inspectOutput, "MCP Servers")} MCP · {grokInspectCount(inspectOutput, "Agents")} {t("agents")}
               </small>
             </summary>
-          <aside className="inspector" aria-label="Grok context">
-            <div className="inspector-tabs" role="tablist" aria-label="Grok capability inspector">
+          <aside className="inspector" aria-label={t("Grok context")}>
+            <div className="inspector-tabs" role="tablist" aria-label={t("Grok capability inspector")}>
               {inspectorTabs.map((tab) => (
                 <button
                   aria-pressed={inspectorTab === tab.id}
@@ -3248,25 +3248,25 @@ function App() {
                   onClick={() => setInspectorTab(tab.id)}
                   type="button"
                 >
-                  {tab.label}
+                  {t(tab.label)}
                 </button>
               ))}
               <button
-                aria-label="Toggle dock position"
+                aria-label={t("Toggle dock position")}
                 onClick={() => {
                   const next: DockPosition = dockPosition === "right" ? "bottom" : "right";
                   setDockPosition(next);
                   window.localStorage.setItem(storageKeys.dockPosition, next);
                 }}
-                title={`Move dock to ${dockPosition === "right" ? "bottom" : "right"}`}
+                title={t("Move dock to {position}", { position: t(dockPosition === "right" ? "bottom" : "right") })}
                 type="button"
               >
                 <PanelRight size={16} />
               </button>
               <button
-                aria-label="Close inspector"
+                aria-label={t("Close inspector")}
                 onClick={() => setToolsOpen(false)}
-                title="Close (⌘B clears panels)"
+                title={t("Close (⌘B clears panels)")}
                 type="button"
               >
                 <X size={16} />
@@ -3278,7 +3278,7 @@ function App() {
                 <>
                   <section className="inspector-card hero-card">
                     <div className="card-head">
-                      <span>Model</span>
+                      <span>{t("Model")}</span>
                       <button disabled={contextBusy !== null} onClick={refreshGrokModels} type="button">
                         {contextBusy === "models" ? <Loader2 className="spin" size={14} /> : <RefreshCcw size={14} />}
                       </button>
@@ -3288,54 +3288,54 @@ function App() {
                       <strong>{activeModel}</strong>
                       <ShieldCheck size={15} />
                     </div>
-                    <p>{activeModelMeta.detail}. Grok Desktop tunes the CLI with model, agent effort, reasoning effort, permissions, memory, web search, subagents, repo path, and ecosystem context.</p>
+                    <p>{t(activeModelMeta.detail)}. {t("Grok Desktop tunes the CLI with model, agent effort, reasoning effort, permissions, memory, web search, subagents, repo path, and ecosystem context.")}</p>
                     <div className="engine-grid">
                       <label>
-                        <span>Model</span>
+                        <span>{t("Model")}</span>
                         <select
-                          aria-label="Grok model preset"
+                          aria-label={t("Grok model preset")}
                           onChange={(event) => changeModelPreset(event.currentTarget.value as GrokModelId)}
                           value={modelPreset}
                         >
                           {(Object.keys(grokModelPresets) as GrokModelId[]).map((model) => (
                             <option key={model} value={model}>
-                              {grokModelPresets[model].label}
+                              {t(grokModelPresets[model].label)}
                             </option>
                           ))}
                         </select>
                       </label>
                       <label>
-                        <span>Agent effort</span>
+                        <span>{t("Agent effort")}</span>
                         <select
-                          aria-label="Agent effort"
+                          aria-label={t("Agent effort")}
                           onChange={(event) => setEffortLevel(event.currentTarget.value as EffortLevel)}
                           value={effortLevel}
                         >
                           {(Object.keys(effortLevels) as EffortLevel[]).map((effort) => (
                             <option key={effort} value={effort}>
-                              {effortLevels[effort].label}
+                              {t(effortLevels[effort].label)}
                             </option>
                           ))}
                         </select>
                       </label>
                       <label>
-                        <span>Reasoning</span>
+                        <span>{t("Reasoning")}</span>
                         <select
-                          aria-label="Reasoning effort"
+                          aria-label={t("Reasoning effort")}
                           onChange={(event) => setReasoningEffort(event.currentTarget.value as ReasoningEffort)}
                           value={reasoningEffort}
                         >
                           {(Object.keys(reasoningEfforts) as ReasoningEffort[]).map((effort) => (
                             <option key={effort} value={effort}>
-                              {reasoningEfforts[effort].label}
+                              {t(reasoningEfforts[effort].label)}
                             </option>
                           ))}
                         </select>
                       </label>
                       <label>
-                        <span>Best-of-N</span>
+                        <span>{t("Best-of-N")}</span>
                         <select
-                          aria-label="Best of N"
+                          aria-label={t("Best of N")}
                           onChange={(event) => setBestOfN(Number(event.currentTarget.value))}
                           value={bestOfN}
                         >
@@ -3347,24 +3347,24 @@ function App() {
                         </select>
                       </label>
                       <label>
-                        <span>Permission</span>
+                        <span>{t("Permission")}</span>
                         <select
-                          aria-label="Permission mode"
+                          aria-label={t("Permission mode")}
                           onChange={(event) => setPermissionMode(event.currentTarget.value as PermissionMode)}
                           value={permissionMode}
                         >
                           {(Object.keys(permissionModes) as PermissionMode[]).map((permission) => (
                             <option key={permission} value={permission}>
-                              {permissionModes[permission].label}
+                              {t(permissionModes[permission].label)}
                             </option>
                           ))}
                         </select>
                       </label>
                       {modelPreset === "custom" ? (
                         <label className="engine-wide">
-                          <span>Custom ID</span>
+                          <span>{t("Custom ID")}</span>
                           <input
-                            aria-label="Custom Grok model ID"
+                            aria-label={t("Custom Grok model ID")}
                             onChange={(event) => setCustomModel(event.currentTarget.value)}
                             placeholder="grok-build"
                             value={customModel}
@@ -3379,7 +3379,7 @@ function App() {
                           onChange={(event) => setExperimentalMemory(event.currentTarget.checked)}
                           type="checkbox"
                         />
-                        <span>Memory</span>
+                        <span>{t("Memory")}</span>
                       </label>
                       <label>
                         <input
@@ -3387,7 +3387,7 @@ function App() {
                           onChange={(event) => setWebSearchEnabled(event.currentTarget.checked)}
                           type="checkbox"
                         />
-                        <span>Web</span>
+                        <span>{t("Web")}</span>
                       </label>
                       <label>
                         <input
@@ -3395,7 +3395,7 @@ function App() {
                           onChange={(event) => setSubagentsEnabled(event.currentTarget.checked)}
                           type="checkbox"
                         />
-                        <span>Subagents</span>
+                        <span>{t("Subagents")}</span>
                       </label>
                       <label>
                         <input
@@ -3403,13 +3403,13 @@ function App() {
                           onChange={(event) => setSelfCheck(event.currentTarget.checked)}
                           type="checkbox"
                         />
-                        <span>Check</span>
+                        <span>{t("Check")}</span>
                       </label>
                     </div>
                     <div className="auth-actions">
                       <button disabled={busyRunner !== null} onClick={() => startGrokLogin(false)} type="button">
                         <Zap size={15} />
-                        Connect
+                        {t("Connect")}
                       </button>
                       <button
                         className="secondary-button"
@@ -3418,11 +3418,11 @@ function App() {
                         type="button"
                       >
                         <TerminalSquare size={15} />
-                        Device
+                        {t("Device")}
                       </button>
                       <button className="secondary-button" disabled={busyRunner !== null} onClick={refreshGrokAuthStatus} type="button">
                         <RefreshCcw size={15} />
-                        Refresh
+                        {t("Refresh")}
                       </button>
                     </div>
                     {modelsRun ? <pre className="mini-output">{formatOutput(modelsRun)}</pre> : null}
@@ -3430,7 +3430,7 @@ function App() {
 
                   <section className="inspector-card">
                     <div className="card-head">
-                      <span>Repo</span>
+                      <span>{t("Repo")}</span>
                       <code>{grokTrust(inspectOutput)}</code>
                     </div>
                     <div className="repo-readout">
@@ -3441,20 +3441,20 @@ function App() {
                     <div className="branch-readout">
                       <GitBranch size={15} />
                       <span>main</span>
-                      <small>local workspace</small>
+                      <small>{t("local workspace")}</small>
                     </div>
                     <div className="metric-grid">
                       <div>
                         <strong>{grokInspectCount(inspectOutput, "Skills")}</strong>
-                        <span>Skills</span>
+                        <span>{t("Skills")}</span>
                       </div>
                       <div>
                         <strong>{grokInspectCount(inspectOutput, "MCP Servers")}</strong>
-                        <span>MCP</span>
+                        <span>{t("MCP")}</span>
                       </div>
                       <div>
                         <strong>{grokInspectCount(inspectOutput, "Agents")}</strong>
-                        <span>Agents</span>
+                        <span>{t("Agents")}</span>
                       </div>
                     </div>
                     <button
@@ -3464,13 +3464,13 @@ function App() {
                       type="button"
                     >
                       {contextBusy === "inspect" ? <Loader2 className="spin" size={15} /> : <RefreshCcw size={15} />}
-                      Inspect Grok
+                      {t("Inspect Grok")}
                     </button>
                   </section>
 
                   <section className="inspector-card">
                     <div className="card-head">
-                      <span>Context Files</span>
+                      <span>{t("Context Files")}</span>
                       <code>{contextFiles.length}</code>
                     </div>
                     <div className="file-list">
@@ -3489,10 +3489,10 @@ function App() {
                 <>
                   <section className="inspector-card hero-card">
                     <div className="card-head">
-                      <span>Skills</span>
-                      <code>{grokInspectCount(inspectOutput, "Skills")} discovered</code>
+                      <span>{t("Skills")}</span>
+                      <code>{grokInspectCount(inspectOutput, "Skills")} {t("discovered")}</code>
                     </div>
-                    <p>Grok inspect reads Claude-compatible skill sources and plugin skills, then Grok Desktop adds the best matches to the coding prompt.</p>
+                    <p>{t("Grok inspect reads Claude-compatible skill sources and plugin skills, then Grok Desktop adds the best matches to the coding prompt.")}</p>
                     <button
                       className="secondary-button"
                       disabled={contextBusy !== null}
@@ -3500,13 +3500,13 @@ function App() {
                       type="button"
                     >
                       {contextBusy === "inspect" ? <Loader2 className="spin" size={15} /> : <RefreshCcw size={15} />}
-                      Refresh Skills
+                      {t("Refresh Skills")}
                     </button>
                   </section>
                   <section className="inspector-card">
                     <div className="capability-list">
                       {(skillItems.length ? skillItems : ["Run Inspect Grok to load available skills."]).map((item) => (
-                        <span key={item}><Sparkles size={14} /> {item}</span>
+                        <span key={item}><Sparkles size={14} /> {t(item)}</span>
                       ))}
                     </div>
                   </section>
@@ -3517,29 +3517,29 @@ function App() {
                 <>
                   <section className="inspector-card hero-card">
                     <div className="card-head">
-                      <span>MCP</span>
-                      <code>{grokInspectCount(inspectOutput, "MCP Servers")} discovered</code>
+                      <span>{t("MCP")}</span>
+                      <code>{grokInspectCount(inspectOutput, "MCP Servers")} {t("discovered")}</code>
                     </div>
-                    <p>Shows servers discovered by Grok inspect and the active managed list from `grok mcp list`.</p>
+                    <p>{t("Shows servers discovered by Grok inspect and the active managed list from `grok mcp list`.")}</p>
                     <div className="auth-actions">
                       <button disabled={busyRunner !== null} onClick={refreshGrokMcp} type="button">
                         {busyRunner === "mcp" ? <Loader2 className="spin" size={15} /> : <RefreshCcw size={15} />}
-                        List MCP
+                        {t("List MCP")}
                       </button>
                       <button className="secondary-button" disabled={busyRunner !== null} onClick={doctorGrokMcp} type="button">
                         {busyRunner === "mcp-doctor" ? <Loader2 className="spin" size={15} /> : <ClipboardCheck size={15} />}
-                        Doctor
+                        {t("Doctor")}
                       </button>
                     </div>
                   </section>
                   <section className="inspector-card">
                     <div className="card-head">
-                      <span>Discovered Servers</span>
+                      <span>{t("Discovered Servers")}</span>
                       <code>{mcpItems.length}</code>
                     </div>
                     <div className="capability-list">
                       {(mcpItems.length ? mcpItems : ["No inspect data yet."]).map((item) => (
-                        <span key={item}><Wrench size={14} /> {item}</span>
+                        <span key={item}><Wrench size={14} /> {t(item)}</span>
                       ))}
                     </div>
                     {mcpRun ? <pre className="mini-output">{formatOutput(mcpRun)}</pre> : null}
@@ -3552,19 +3552,19 @@ function App() {
                 <>
                   <section className="inspector-card hero-card">
                     <div className="card-head">
-                      <span>Agents</span>
-                      <code>{grokInspectCount(inspectOutput, "Agents")} available</code>
+                      <span>{t("Agents")}</span>
+                      <code>{grokInspectCount(inspectOutput, "Agents")} {t("available")}</code>
                     </div>
-                    <p>Agent metadata helps route repo analysis, review, debugging, browser, and design tasks to the right Grok sub-capability.</p>
+                    <p>{t("Agent metadata helps route repo analysis, review, debugging, browser, and design tasks to the right Grok sub-capability.")}</p>
                     <button className="secondary-button" disabled={busyRunner !== null} onClick={refreshGrokSessions} type="button">
                       {busyRunner === "sessions" ? <Loader2 className="spin" size={15} /> : <History size={15} />}
-                      Sessions
+                      {t("Sessions")}
                     </button>
                   </section>
                   <section className="inspector-card">
                     <div className="capability-list">
                       {(agentItems.length ? agentItems : ["Run Inspect Grok to load agents."]).map((item) => (
-                        <span key={item}><Bot size={14} /> {item}</span>
+                        <span key={item}><Bot size={14} /> {t(item)}</span>
                       ))}
                     </div>
                     {sessionsRun ? <pre className="mini-output">{formatOutput(sessionsRun)}</pre> : null}
@@ -3576,19 +3576,19 @@ function App() {
                 <>
                   <section className="inspector-card hero-card">
                     <div className="card-head">
-                      <span>Plugins</span>
-                      <code>{grokInspectCount(inspectOutput, "Plugins")} discovered</code>
+                      <span>{t("Plugins")}</span>
+                      <code>{grokInspectCount(inspectOutput, "Plugins")} {t("discovered")}</code>
                     </div>
-                    <p>Grok Desktop separates discovered plugins from the active managed list so developers can see what Grok can use versus what it owns.</p>
+                    <p>{t("Grok Desktop separates discovered plugins from the active managed list so developers can see what Grok can use versus what it owns.")}</p>
                     <button className="secondary-button" disabled={busyRunner !== null} onClick={refreshGrokPlugins} type="button">
                       {busyRunner === "plugins" ? <Loader2 className="spin" size={15} /> : <RefreshCcw size={15} />}
-                      List Plugins
+                      {t("List Plugins")}
                     </button>
                   </section>
                   <section className="inspector-card">
                     <div className="capability-list">
                       {(pluginItems.length ? pluginItems : ["Run Inspect Grok to load plugins."]).map((item) => (
-                        <span key={item}><Layers3 size={14} /> {item}</span>
+                        <span key={item}><Layers3 size={14} /> {t(item)}</span>
                       ))}
                     </div>
                     {pluginsRun ? <pre className="mini-output">{formatOutput(pluginsRun)}</pre> : null}
@@ -3600,15 +3600,15 @@ function App() {
                 <>
                   <section className="inspector-card hero-card">
                     <div className="card-head">
-                      <span>Hooks</span>
-                      <code>{grokInspectCount(inspectOutput, "Hooks")} loaded</code>
+                      <span>{t("Hooks")}</span>
+                      <code>{grokInspectCount(inspectOutput, "Hooks")} {t("loaded")}</code>
                     </div>
-                    <p>Hooks are surfaced as first-class context because they change how Grok behaves before and after tool work.</p>
+                    <p>{t("Hooks are surfaced as first-class context because they change how Grok behaves before and after tool work.")}</p>
                   </section>
                   <section className="inspector-card">
                     <div className="capability-list">
                       {(hookItems.length ? hookItems : ["Run Inspect Grok to load hooks."]).map((item) => (
-                        <span key={item}><Zap size={14} /> {item}</span>
+                        <span key={item}><Zap size={14} /> {t(item)}</span>
                       ))}
                     </div>
                   </section>
@@ -3619,47 +3619,47 @@ function App() {
                 <>
                   <section className="inspector-card hero-card">
                     <div className="card-head">
-                      <span>Approvals</span>
+                      <span>{t("Approvals")}</span>
                       <code>{permissionsSource}</code>
                     </div>
                     <div className="approval-select">
                       <ShieldCheck size={16} />
                       <select
-                        aria-label="Approval policy"
+                        aria-label={t("Approval policy")}
                         onChange={(event) => setActionPolicy(event.currentTarget.value as ActionPolicy)}
                         value={actionPolicy}
                       >
                         {(Object.keys(actionPolicies) as ActionPolicy[]).map((policy) => (
                           <option key={policy} value={policy}>
-                            {actionPolicies[policy].label}
+                            {t(actionPolicies[policy].label)}
                           </option>
                         ))}
                       </select>
                     </div>
-                    <p>{currentPolicy.detail}</p>
+                    <p>{t(currentPolicy.detail)}</p>
                   </section>
                   <section className="inspector-card">
                     <div className="card-head">
-                      <span>Grok Optimization</span>
-                      <code>{effortLevels[effortLevel].label}</code>
+                      <span>{t("Grok Optimization")}</span>
+                      <code>{t(effortLevels[effortLevel].label)}</code>
                     </div>
                     <div className="safety-list">
                       {grokOptimizationRules.map((rule) => (
                         <span key={rule}><ShieldCheck size={14} /> {rule}</span>
                       ))}
-                      <span><ShieldCheck size={14} /> Model: {activeModel}</span>
-                      <span><ShieldCheck size={14} /> Permission mode: {permissionModes[permissionMode].label}</span>
-                      <span><ShieldCheck size={14} /> Reasoning: {activeReasoningLabel}</span>
-                      <span><ShieldCheck size={14} /> Web search: {webSearchEnabled ? "enabled" : "disabled"}</span>
-                      <span><ShieldCheck size={14} /> Subagents: {subagentsEnabled ? "enabled" : "disabled"}</span>
-                      <span><ShieldCheck size={14} /> Self-check: {selfCheck ? "enabled" : "off"}</span>
+                      <span><ShieldCheck size={14} /> {t("Model")}: {activeModel}</span>
+                      <span><ShieldCheck size={14} /> {t("Permission mode")}: {t(permissionModes[permissionMode].label)}</span>
+                      <span><ShieldCheck size={14} /> {t("Reasoning")}: {t(activeReasoningLabel)}</span>
+                      <span><ShieldCheck size={14} /> {t("Web search")}: {webSearchEnabled ? t("enabled") : t("disabled")}</span>
+                      <span><ShieldCheck size={14} /> {t("Subagents")}: {subagentsEnabled ? t("enabled") : t("disabled")}</span>
+                      <span><ShieldCheck size={14} /> {t("Self-check")}: {selfCheck ? t("enabled") : t("off")}</span>
                     </div>
                   </section>
                   <section className="inspector-card">
                     <div className="card-head">
-                      <span>Command History</span>
+                      <span>{t("Command History")}</span>
                       <button
-                        aria-label="Clear run history"
+                        aria-label={t("Clear run history")}
                         disabled={history.length === 0 && !lastRun}
                         onClick={clearRunHistory}
                         type="button"
@@ -3677,7 +3677,7 @@ function App() {
                           </button>
                         ))
                       ) : (
-                        <p>No runs yet.</p>
+                        <p>{t("No runs yet.")}</p>
                       )}
                     </div>
                   </section>
@@ -3692,7 +3692,7 @@ function App() {
                     const next = (drafts[mode] ?? "") + text;
                     setDrafts((current) => ({ ...current, [mode]: next }));
                     composerRef.current?.setValue(next);
-                    setSessionNotice("Desktop context appended to your draft.");
+                    setSessionNotice(t("Desktop context appended to your draft."));
                   }}
                 />
               ) : null}
@@ -3712,12 +3712,12 @@ function App() {
           <summary className="terminal-summary">
             <span>
               <SquareTerminal size={16} />
-              <strong>Terminal</strong>
-              <small className={busyRunner ? "running" : ""}>{busyRunner ? "Running" : "Idle"}</small>
+              <strong>{t("Terminal")}</strong>
+              <small className={busyRunner ? "running" : ""}>{busyRunner ? t("Running") : t("Idle")}</small>
             </span>
             <span>
               <button
-                aria-label="Dock terminal right"
+                aria-label={t("Dock terminal right")}
                 className={dockPosition === "right" ? "dock-dot active" : "dock-dot"}
                 onClick={(event) => {
                   event.preventDefault();
@@ -3725,10 +3725,10 @@ function App() {
                 }}
                 type="button"
               >
-                Right
+                {t("Right")}
               </button>
               <button
-                aria-label="Dock terminal bottom"
+                aria-label={t("Dock terminal bottom")}
                 className={dockPosition === "bottom" ? "dock-dot active" : "dock-dot"}
                 onClick={(event) => {
                   event.preventDefault();
@@ -3736,22 +3736,22 @@ function App() {
                 }}
                 type="button"
               >
-                Bottom
+                {t("Bottom")}
               </button>
-              <small>{terminalDisplay.length} lines</small>
+              <small>{terminalDisplay.length} {t("lines")}</small>
             </span>
           </summary>
           <div className="terminal-head">
             <div>
               <SquareTerminal size={17} />
-              <strong>Terminal</strong>
-              <span className={busyRunner ? "running" : ""}>{busyRunner ? "Running" : "Idle"}</span>
+              <strong>{t("Terminal")}</strong>
+              <span className={busyRunner ? "running" : ""}>{busyRunner ? t("Running") : t("Idle")}</span>
             </div>
             <div className="terminal-actions">
               <label>
                 <TerminalSquare size={15} />
                 <input
-                  aria-label="Shell command"
+                  aria-label={t("Shell command")}
                   onChange={(event) => setShellCommand(event.currentTarget.value)}
                   value={shellCommand}
                 />
@@ -3762,7 +3762,7 @@ function App() {
                 type="button"
               >
                 {busyRunner === "shell" ? <Loader2 className="spin" size={16} /> : <Play size={16} />}
-                Run
+                {t("Run")}
               </button>
             </div>
           </div>
@@ -3779,40 +3779,40 @@ function App() {
 
         <details
           className="toolbelt"
-          aria-label="Developer tools"
+          aria-label={t("Developer tools")}
           onToggle={(event) => setToolbeltOpen(event.currentTarget.open)}
           open={toolbeltOpen}
         >
           <summary>
-            <span><Wrench size={16} /> Developer utilities</span>
-            <small>Browser, Absorb Repo</small>
+            <span><Wrench size={16} /> {t("Developer utilities")}</span>
+            <small>{t("Browser")}, {t("Absorb Repo")}</small>
           </summary>
           <div className="toolbelt-grid">
           <div className="tool-card">
             <div className="tool-title">
               <Globe2 size={17} />
-              <span>Browser</span>
+              <span>{t("Browser")}</span>
             </div>
             <input
-              aria-label="Browser task"
+              aria-label={t("Browser task")}
               onChange={(event) => setBrowserTask(event.currentTarget.value)}
               value={browserTask}
             />
             <button disabled={busyRunner !== null || browserTask.trim().length === 0} onClick={runBrowser} type="button">
               {busyRunner === "browser" ? <Loader2 className="spin" size={16} /> : <Play size={16} />}
-              Run
+              {t("Run")}
             </button>
           </div>
 
           <div className="tool-card">
             <div className="tool-title">
               <FolderDown size={17} />
-              <span>Absorb Repo</span>
+              <span>{t("Absorb Repo")}</span>
             </div>
             <input
-              aria-label="Repository path"
+              aria-label={t("Repository path")}
               onChange={(event) => setRepoPath(event.currentTarget.value)}
-              placeholder="/path/to/repo"
+              placeholder={t("/path/to/repo")}
               value={repoPath}
             />
             <label className="checkline">
@@ -3821,17 +3821,17 @@ function App() {
                 onChange={(event) => setCopyText(event.currentTarget.checked)}
                 type="checkbox"
               />
-              <span>copy text</span>
+              <span>{t("copy text")}</span>
             </label>
             <button disabled={busyRunner !== null || repoPath.trim().length === 0} onClick={runAbsorbRepo} type="button">
               {busyRunner === "absorb" ? <Loader2 className="spin" size={16} /> : <Wrench size={16} />}
-              Absorb
+              {t("Absorb")}
             </button>
           </div>
           </div>
         </details>
 
-        <footer className="workspace-statusbar" aria-label="Workspace status">
+        <footer className="workspace-statusbar" aria-label={t("Workspace status")}>
           {/* These chips looked like controls but were dead text. Now they're
               real buttons: project → folder picker, model → Model settings,
               policy → Permissions settings. */}
@@ -3840,7 +3840,7 @@ function App() {
             className="status-cluster status-action"
             onClick={pickFolder}
             disabled={folderPickerBusy}
-            title="Pick the project folder Grok runs in"
+            title={t("Pick the project folder Grok runs in")}
           >
             <FolderGit2 size={13} />
             <span className="status-cwd" title={workspacePath}>{workspacePath}</span>
@@ -3852,11 +3852,11 @@ function App() {
               setSettingsSection("model");
               setSettingsOpen(true);
             }}
-            title="Change model & reasoning"
+            title={t("Change model & reasoning")}
           >
             <Sparkles size={13} />
             <span>{activeModel}</span>
-            {!modelIsVerified ? <span className="status-warn">unverified</span> : null}
+            {!modelIsVerified ? <span className="status-warn">{t("unverified")}</span> : null}
           </button>
           <button
             type="button"
@@ -3865,10 +3865,10 @@ function App() {
               setSettingsSection("permissions");
               setSettingsOpen(true);
             }}
-            title="Change action policy & permissions"
+            title={t("Change action policy & permissions")}
           >
             <ShieldCheck size={13} />
-            <span>{actionPolicies[actionPolicy].label}</span>
+            <span>{t(actionPolicies[actionPolicy].label)}</span>
           </button>
           <div className="status-cluster">
             {/* Only report a "last run" once a real run has actually happened
@@ -3883,26 +3883,26 @@ function App() {
             )}
             <span>
               {grokIsRunning
-                ? "Running"
+                ? t("Running")
                 : lastRun && totalRuns > 0
-                  ? `${lastRun.ok ? "Last run ok" : "Last run failed"} · ${(lastRun.duration_ms / 1000).toFixed(1)}s`
+                  ? `${lastRun.ok ? t("Last run ok") : t("Last run failed")} · ${(lastRun.duration_ms / 1000).toFixed(1)}s`
                   : isGrokReady
-                    ? "Idle · ready"
-                    : "Ready"}
+                    ? t("Idle · ready")
+                    : t("Ready")}
             </span>
           </div>
           <div className="status-cluster status-right">
             <History size={13} />
-            <span>{totalRuns} runs</span>
+            <span>{totalRuns} {t("runs")}</span>
             <button
               className="status-clear"
               disabled={messages.length === 0 && history.length === 0}
               onClick={clearRunHistory}
               type="button"
-              title="Clear conversation, run history, and terminal"
+              title={t("Clear conversation, run history, and terminal")}
             >
               <Trash2 size={12} />
-              <span>Clear</span>
+              <span>{t("Clear")}</span>
             </button>
           </div>
         </footer>

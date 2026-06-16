@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useLocale } from '../hooks/useLocale';
+import { t } from '../lib/i18n';
 import type { Tab } from '../lib/tabs';
 
 interface Props {
@@ -16,11 +18,12 @@ interface Props {
  * the close button so a fresh user isn't confused by "X to delete my chat".
  */
 export function TabBar({ tabs, activeId, onSelect, onCreate, onClose, onRename }: Props) {
+  useLocale();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
 
   return (
-    <div className="tab-bar" role="tablist" aria-label="Sessions">
+    <div className="tab-bar" role="tablist" aria-label={t('Sessions')}>
       {tabs.map((tab) => {
         const isActive = tab.id === activeId;
         const isEditing = editingId === tab.id;
@@ -35,7 +38,7 @@ export function TabBar({ tabs, activeId, onSelect, onCreate, onClose, onRename }
               setEditingId(tab.id);
               setDraft(tab.name);
             }}
-            title={tab.cwd || 'No cwd set'}
+            title={tab.cwd || t('No cwd set')}
           >
             {isEditing ? (
               <input
@@ -66,13 +69,13 @@ export function TabBar({ tabs, activeId, onSelect, onCreate, onClose, onRename }
                   <button
                     type="button"
                     className="tab-close"
-                    aria-label={`Close ${tab.name}`}
+                    aria-label={t('Close {tabName}', { tabName: tab.name })}
                     onClick={(e) => {
                       e.stopPropagation();
                       const ok =
                         tab.messages.length === 0 ||
                         window.confirm(
-                          `Close "${tab.name}"? This clears ${tab.messages.length} message${tab.messages.length === 1 ? '' : 's'} for this session.`,
+                          t('Close "{tabName}"? This clears {count} message(s) for this session.', { tabName: tab.name, count: tab.messages.length }),
                         );
                       if (ok) onClose(tab.id);
                     }}
@@ -89,8 +92,8 @@ export function TabBar({ tabs, activeId, onSelect, onCreate, onClose, onRename }
         type="button"
         className="tab-add"
         onClick={onCreate}
-        title="New session"
-        aria-label="New session"
+        title={t('New session')}
+        aria-label={t('New session')}
       >
         +
       </button>

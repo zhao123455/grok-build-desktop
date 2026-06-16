@@ -7,12 +7,14 @@ import {
 } from 'react';
 import { enqueueRun } from '../lib/grok';
 import { useActiveRun } from '../hooks/useActiveRun';
+import { useLocale } from '../hooks/useLocale';
 import { useQueue } from '../hooks/useQueue';
 import {
   notePendingSubmitEnd,
   notePendingSubmitStart,
 } from '../lib/streamStore';
 import { extractFileMentions, readFileSafe, type FileEntry } from '../lib/files';
+import { t } from '../lib/i18n';
 import { FilePicker } from './FilePicker';
 
 export interface ComposerHandle {
@@ -86,6 +88,7 @@ export const Composer = forwardRef<ComposerHandle, Props>(function Composer(
   }: Props,
   outerRef,
 ) {
+  useLocale();
   const ref = useRef<HTMLTextAreaElement>(null);
   // Track composition via BOTH a ref (sync, immune to React lag) and React
   // state (drives Send/Queuing label re-render). The ref is the authoritative
@@ -232,8 +235,8 @@ export const Composer = forwardRef<ComposerHandle, Props>(function Composer(
         disabled={submitting}
         placeholder={
           submitting
-            ? 'Queuing your prompt…'
-            : placeholder ?? (hasInflight ? 'Queue another prompt…' : 'Ask Grok…')
+            ? t('Queuing your prompt…')
+            : placeholder ?? (hasInflight ? t('Queue another prompt…') : t('Ask Grok…'))
         }
         onCompositionStart={() => {
           composingRef.current = true;
@@ -299,7 +302,7 @@ export const Composer = forwardRef<ComposerHandle, Props>(function Composer(
         disabled={submitting}
         onClick={() => void submit()}
       >
-        {submitting ? 'Queuing…' : hasInflight ? 'Enqueue' : 'Send'}
+        {submitting ? t('Queuing…') : hasInflight ? t('Enqueue') : t('Send')}
       </button>
     </div>
   );

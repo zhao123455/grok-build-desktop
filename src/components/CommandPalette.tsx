@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocale } from '../hooks/useLocale';
+import { t } from '../lib/i18n';
 
 export interface PaletteAction {
   id: string;
@@ -28,6 +30,7 @@ interface Props {
  *   ⎋     close without running
  */
 export function CommandPalette({ open, actions, onClose }: Props) {
+  useLocale();
   const [query, setQuery] = useState('');
   const [highlight, setHighlight] = useState(0);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -74,7 +77,7 @@ export function CommandPalette({ open, actions, onClose }: Props) {
       className="palette-backdrop"
       role="dialog"
       aria-modal="true"
-      aria-label="Command palette"
+      aria-label={t('Command palette')}
       onClick={onClose}
     >
       <div className="palette-shell" onClick={(e) => e.stopPropagation()}>
@@ -84,7 +87,7 @@ export function CommandPalette({ open, actions, onClose }: Props) {
             ref={inputRef}
             className="palette-search-input"
             value={query}
-            placeholder="Type a command…"
+            placeholder={t('Type a command…')}
             onChange={(e) => {
               setQuery(e.currentTarget.value);
               setHighlight(0);
@@ -115,7 +118,7 @@ export function CommandPalette({ open, actions, onClose }: Props) {
         </div>
         <div className="palette-list" role="listbox">
           {filtered.length === 0 ? (
-            <div className="palette-empty">No commands match.</div>
+            <div className="palette-empty">{t('No commands match.')}</div>
           ) : (
             filtered.map((action, idx) => (
               <button
@@ -127,9 +130,9 @@ export function CommandPalette({ open, actions, onClose }: Props) {
                 onMouseEnter={() => setHighlight(idx)}
                 onClick={() => run(action)}
               >
-                <span className="palette-row-label">{action.label}</span>
+                <span className="palette-row-label">{t(action.label)}</span>
                 {action.group ? (
-                  <span className="palette-row-group">{action.group}</span>
+                  <span className="palette-row-group">{t(action.group)}</span>
                 ) : null}
                 {action.shortcut ? (
                   <span className="palette-row-shortcut">{action.shortcut}</span>

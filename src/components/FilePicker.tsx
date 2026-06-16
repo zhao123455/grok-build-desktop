@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocale } from '../hooks/useLocale';
 import { globFiles, type FileEntry } from '../lib/files';
+import { t } from '../lib/i18n';
 
 interface Props {
   cwd: string;
@@ -21,6 +23,7 @@ interface Props {
  * extracted from the textarea, and pushes it down via the `query` prop.
  */
 export function FilePicker({ cwd, query, onSelect, onCancel }: Props) {
+  useLocale();
   const [entries, setEntries] = useState<FileEntry[]>([]);
   const [highlight, setHighlight] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -79,19 +82,19 @@ export function FilePicker({ cwd, query, onSelect, onCancel }: Props) {
   const formattedQuery = useMemo(() => query.trim(), [query]);
 
   return (
-    <div className="file-picker" role="listbox" aria-label="File reference">
+    <div className="file-picker" role="listbox" aria-label={t('File reference')}>
       <div className="file-picker-head">
         <span className="file-picker-title">
-          {formattedQuery ? `@${formattedQuery}` : 'Type to search files in cwd'}
+          {formattedQuery ? `@${formattedQuery}` : t('Type to search files in cwd')}
         </span>
         <span className="file-picker-meta">
-          {loading ? '…' : `${entries.length} match${entries.length === 1 ? '' : 'es'}`}
+          {loading ? '…' : t('{count} match(es)', { count: entries.length })}
         </span>
       </div>
       <div className="file-picker-list" ref={listRef}>
         {entries.length === 0 ? (
           <div className="file-picker-empty">
-            {loading ? 'Scanning…' : 'No files matched. ⎋ to dismiss.'}
+            {loading ? t('Scanning…') : t('No files matched. ⎋ to dismiss.')}
           </div>
         ) : (
           entries.map((entry, idx) => (
@@ -114,7 +117,7 @@ export function FilePicker({ cwd, query, onSelect, onCancel }: Props) {
           ))
         )}
       </div>
-      <p className="file-picker-hint">↑↓ navigate · ⏎/Tab insert · ⎋ dismiss</p>
+      <p className="file-picker-hint">↑↓ {t('navigate')} · ⏎/Tab {t('insert')} · ⎋ {t('dismiss')}</p>
     </div>
   );
 }

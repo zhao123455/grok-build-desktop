@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useLocale } from '../hooks/useLocale';
+import { t } from '../lib/i18n';
 import { deletePrompt, listPrompts, upsertPrompt, type Prompt } from '../lib/prompts';
 
 interface Props {
@@ -18,6 +20,7 @@ interface EditorState {
 const EMPTY_EDITOR: EditorState = { name: '', category: '', body: '' };
 
 export function PromptLibrary({ onInsert, filter }: Props) {
+  useLocale();
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(true);
   const [editor, setEditor] = useState<EditorState | null>(null);
@@ -69,7 +72,7 @@ export function PromptLibrary({ onInsert, filter }: Props) {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this prompt?')) return;
+    if (!confirm(t('Delete this prompt?'))) return;
     const ok = await deletePrompt(id);
     if (ok) setPrompts((prev) => prev.filter((p) => p.id !== id));
   };
@@ -79,7 +82,7 @@ export function PromptLibrary({ onInsert, filter }: Props) {
       <header className="prompt-library-header">
         <input
           type="search"
-          placeholder="Search prompts…"
+          placeholder={t('Search prompts…')}
           value={query}
           onChange={(e) => setQuery(e.currentTarget.value)}
           className="prompt-library-search"
@@ -87,19 +90,19 @@ export function PromptLibrary({ onInsert, filter }: Props) {
         <button
           className="prompt-library-add"
           onClick={() => setEditor({ ...EMPTY_EDITOR })}
-          title="New prompt"
+          title={t('New prompt')}
         >
-          + New
+          + {t('New')}
         </button>
       </header>
 
       {loading ? (
-        <div className="prompt-library-empty">Loading…</div>
+        <div className="prompt-library-empty">{t('Loading…')}</div>
       ) : filtered.length === 0 ? (
         <div className="prompt-library-empty">
           {prompts.length === 0
-            ? 'No prompts yet. Click + New to save your first.'
-            : 'No matches.'}
+            ? t('No prompts yet. Click + New to save your first.')
+            : t('No matches.')}
         </div>
       ) : (
         <ul className="prompt-library-list">
@@ -108,7 +111,7 @@ export function PromptLibrary({ onInsert, filter }: Props) {
               <button
                 className="prompt-library-pick"
                 onClick={() => onInsert(p.body)}
-                title="Insert into composer"
+                title={t('Insert into composer')}
               >
                 <div className="prompt-library-name">{p.name}</div>
                 {p.category ? (
@@ -130,14 +133,14 @@ export function PromptLibrary({ onInsert, filter }: Props) {
                     })
                   }
                   className="prompt-library-edit"
-                  title="Edit"
+                  title={t('Edit')}
                 >
                   ✎
                 </button>
                 <button
                   onClick={() => handleDelete(p.id)}
                   className="prompt-library-del"
-                  title="Delete"
+                  title={t('Delete')}
                 >
                   ✕
                 </button>
@@ -155,37 +158,37 @@ export function PromptLibrary({ onInsert, filter }: Props) {
           }}
         >
           <div className="prompt-library-modal">
-            <h3>{editor.id ? 'Edit prompt' : 'New prompt'}</h3>
+            <h3>{editor.id ? t('Edit prompt') : t('New prompt')}</h3>
             <label>
-              Name
+              {t('Name')}
               <input
                 autoFocus
                 value={editor.name}
                 onChange={(e) =>
                   setEditor({ ...editor, name: e.currentTarget.value })
                 }
-                placeholder="e.g. 'Review PR'"
+                placeholder={t("e.g. 'Review PR'")}
               />
             </label>
             <label>
-              Category <span className="prompt-library-hint">(optional)</span>
+              {t('Category')} <span className="prompt-library-hint">{t('(optional)')}</span>
               <input
                 value={editor.category}
                 onChange={(e) =>
                   setEditor({ ...editor, category: e.currentTarget.value })
                 }
-                placeholder="e.g. 'reviews'"
+                placeholder={t("e.g. 'reviews'")}
               />
             </label>
             <label>
-              Body
+              {t('Body')}
               <textarea
                 rows={10}
                 value={editor.body}
                 onChange={(e) =>
                   setEditor({ ...editor, body: e.currentTarget.value })
                 }
-                placeholder="The full prompt text. Inserted into the composer as-is."
+                placeholder={t('The full prompt text. Inserted into the composer as-is.')}
               />
             </label>
             <div className="prompt-library-modal-actions">
@@ -193,14 +196,14 @@ export function PromptLibrary({ onInsert, filter }: Props) {
                 className="prompt-library-cancel"
                 onClick={() => setEditor(null)}
               >
-                Cancel
+                {t('Cancel')}
               </button>
               <button
                 className="prompt-library-save"
                 disabled={!editor.name.trim() || !editor.body.trim()}
                 onClick={handleSave}
               >
-                Save
+                {t('Save')}
               </button>
             </div>
           </div>
