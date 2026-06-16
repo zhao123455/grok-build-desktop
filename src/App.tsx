@@ -11,6 +11,7 @@ import {
   ArchiveRestore,
   BookmarkPlus,
   Bot,
+  Bug,
   ChevronDown,
   CheckCircle2,
   CircleAlert,
@@ -21,11 +22,13 @@ import {
   FolderDown,
   FolderGit2,
   FolderInput,
+  FolderOpen,
   FolderPlus,
   GitBranch,
   Globe2,
   History,
   Layers3,
+  Lightbulb,
   Loader2,
   Moon,
   MoreHorizontal,
@@ -2954,8 +2957,37 @@ function App() {
               {messages.length === 0 ? (
                 <div className="empty-state">
                   <div className="empty-state-head">
-                    <div className="empty-state-avatar kun-empty-mascot">
-                      <img src={kunGreet} alt="" aria-hidden />
+                    <div className="kun-hero-stage" aria-hidden="true">
+                      <div className="kun-stage-shell">
+                        <div className="kun-stage-titlebar">
+                          <span className="stage-dot red" />
+                          <span className="stage-dot yellow" />
+                          <span className="stage-dot green" />
+                          <PanelRight size={14} />
+                        </div>
+                        <div className="kun-stage-body">
+                          <div className="kun-stage-nav">
+                            <span className="active" />
+                            <span />
+                            <span />
+                            <span />
+                          </div>
+                          <div className="kun-stage-canvas">
+                            <span className="stage-thread one" />
+                            <span className="stage-thread two" />
+                            <span className="stage-thread three" />
+                          </div>
+                        </div>
+                        <span className="kun-stage-flow left" />
+                        <span className="kun-stage-flow right" />
+                        <div className="kun-stage-composer">
+                          <span />
+                          <span />
+                        </div>
+                        <div className="empty-state-avatar kun-empty-mascot">
+                          <img src={kunGreet} alt="" aria-hidden />
+                        </div>
+                      </div>
                     </div>
                     <h2 className="empty-state-title">{t("How can Grok help today?")}</h2>
                     <p className="empty-state-subtitle">
@@ -2965,38 +2997,41 @@ function App() {
                   <div className="starter-grid">
                     {[
                       {
+                        icon: <FolderOpen size={18} />,
+                        tone: "blue",
                         title: "Review this repository",
                         body: "Surface the highest-impact risks and gaps you can verify in 30 seconds.",
                         prompt:
                           "Review this repository like a senior engineer. Surface the top 3 risks or gaps you can verify in under a minute, with one exact command per finding.",
                       },
                       {
+                        icon: <Bug size={18} />,
+                        tone: "emerald",
                         title: "Explain this codebase",
                         body: "Give me a tight architecture tour so I can start contributing today.",
                         prompt:
                           "Give me a 5-bullet architecture tour of this repository: entry point, key modules, build/run command, test command, and one gotcha. Be concrete.",
                       },
                       {
+                        icon: <Lightbulb size={18} />,
+                        tone: "violet",
                         title: "Add a failing test",
                         body: "Pick a real bug or gap and write a failing test that pins it down.",
                         prompt:
                           "Find one real bug, edge case, or gap in this repository. Write a failing test that pins it down. Tell me the file path and the exact command to run just that test.",
                       },
-                      {
-                        title: "Suggest the next change",
-                        body: "What is the single most useful next code action right now?",
-                        prompt:
-                          "What is the single most useful next code action in this repository right now? Show the proposed diff and the verification command. Be specific.",
-                      },
                     ].map((card) => (
                       <button
                         key={card.title}
-                        className="starter-card"
+                        className={`starter-card starter-${card.tone}`}
                         onClick={() => updatePrompt(card.prompt)}
                         type="button"
                       >
-                        <strong>{t(card.title)}</strong>
-                        <span>{t(card.body)}</span>
+                        <span className="starter-icon">{card.icon}</span>
+                        <span className="starter-copy">
+                          <strong>{t(card.title)}</strong>
+                          <span>{t(card.body)}</span>
+                        </span>
                       </button>
                     ))}
                   </div>
