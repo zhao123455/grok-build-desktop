@@ -5707,6 +5707,8 @@ button.status-cluster.status-action {
   --grok-text-2: #54678c;
   --grok-text-3: #8492b1;
   --grok-text-4: #a2abc0;
+  --ds-scrollbar-thumb: rgba(84, 103, 140, 0.24);
+  --ds-scrollbar-thumb-hover: rgba(84, 103, 140, 0.34);
   --terminal-bg: #101827;
   --terminal-text: #f0f5fc;
 }
@@ -5745,12 +5747,21 @@ button.status-cluster.status-action {
   --grok-text-2: #bdc9de;
   --grok-text-3: #8593b1;
   --grok-text-4: #687590;
+  --ds-scrollbar-thumb: rgba(151, 178, 215, 0.28);
+  --ds-scrollbar-thumb-hover: rgba(171, 198, 233, 0.38);
   --terminal-bg: #101827;
   --terminal-text: #f0f5fc;
 }
 
 .app-shell {
   color-scheme: light;
+  font-family:
+    "SF Pro Text", "PingFang SC", "Noto Sans SC", "Helvetica Neue",
+    Arial, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  font-size: 14px;
+  letter-spacing: 0;
+  line-height: 1.5;
 }
 
 .app-shell.theme-dark {
@@ -5793,6 +5804,78 @@ button.status-cluster.status-action {
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
+.app-shell * {
+  scrollbar-color: var(--ds-scrollbar-thumb) transparent;
+  scrollbar-width: thin;
+}
+
+.app-shell *::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+
+.app-shell *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.app-shell *::-webkit-scrollbar-thumb {
+  background: var(--ds-scrollbar-thumb);
+  background-clip: content-box;
+  border: 3px solid transparent;
+  border-radius: 999px;
+}
+
+.app-shell *::-webkit-scrollbar-thumb:hover {
+  background: var(--ds-scrollbar-thumb-hover);
+  background-clip: content-box;
+}
+
+.app-shell *::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.app-shell .brand h1 {
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.18;
+}
+
+.app-shell .brand span,
+.app-shell .account-strip span {
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+
+.app-shell .nav-head {
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0;
+}
+
+.app-shell .nav-list button,
+.app-shell .history-list button {
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.app-shell .history-list strong {
+  font-size: 13.5px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.app-shell .history-list small,
+.app-shell .history-list time,
+.app-shell .workspace-statusbar,
+.app-shell .status-cluster,
+.app-shell .composer-footer,
+.app-shell .composer-footer select {
+  font-size: 12px;
+  letter-spacing: 0;
+}
+
 .app-shell .message.message-user::before {
   color: var(--text-muted);
 }
@@ -5808,7 +5891,13 @@ button.status-cluster.status-action {
 .app-shell .message.message-user .message-body {
   background: var(--field-strong);
   border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  border-radius: 20px;
   box-shadow: 0 14px 32px rgba(20, 47, 95, 0.05);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.55;
+  max-width: min(72%, 640px);
+  padding: 0.66rem 0.95rem;
 }
 
 .app-shell.theme-dark .message.message-user .message-body {
@@ -5818,6 +5907,11 @@ button.status-cluster.status-action {
 .app-shell .message.message-assistant .message-body {
   background: var(--panel);
   border-color: var(--line);
+  border-radius: 18px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.57;
+  padding: 0.7rem 0.95rem;
 }
 
 .app-shell .composer {
@@ -5827,6 +5921,9 @@ button.status-cluster.status-action {
 
 .app-shell .composer textarea {
   border-color: var(--line);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
 }
 
 .app-shell .composer-send,
@@ -5850,6 +5947,13 @@ button.status-cluster.status-action {
 .app-shell input[type="checkbox"],
 .app-shell input[type="radio"] {
   accent-color: var(--accent);
+}
+
+@media (max-width: 640px) {
+  .app-shell .message.message-user .message-body,
+  .app-shell .message.message-assistant .message-body {
+    max-width: 92%;
+  }
 }
 
 @media (max-width: 900px) {
